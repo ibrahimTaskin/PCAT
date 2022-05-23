@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 //create schema
 const PhotoSchema = new Schema({
   title: String,
-  description: String,
+  detail: String,
   image: String,
   date: {
     type: Date,
