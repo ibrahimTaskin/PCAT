@@ -21,8 +21,8 @@ app.get('/about', (req, res) => {
   res.render('about');
 });
 
-app.get('/add_post', (req, res) => {
-    res.render('add_post');
+app.get('/add', (req, res) => {
+    res.render('add');
   });
 
 app.listen(port, () => {
