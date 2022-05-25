@@ -39,6 +39,11 @@ app.get('/add', (req, res) => {
   res.render('add');
 });
 
+app.get('/photo/:id', async (req, res) => {  
+  const photo = await Photo.findById(req.params.id); // id ile fotoyu bul
+  res.render('photo',{photo}); // gönder
+});
+
 // catch action
 app.post('/photos', async(req, res) => {
   await Photo.create(req.body);  
