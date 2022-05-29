@@ -14,6 +14,7 @@ const app = express();
 mongoose.connect('mongodb://localhost/pcat-test-db', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  //useFindAndModify:false
 });
 
 //TEMPLATE ENGINE
@@ -23,7 +24,9 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(methodOverride('_method'));
+app.use(methodOverride('_method',{
+  methods:['POST','GET']
+}));
 app.use(fileUpload());
 
 const port = 3000;
@@ -50,13 +53,13 @@ app.get('/photo/:id', async (req, res) => {
   res.render('photo', { photo }); // gönder
 });
 
-app.get('/photos/edit/:id', async (req, res) => {
+app.get('/photo/edit/:id', async (req, res) => {
   const photo = await Photo.findOne({_id : req.params.id}); // id ile fotoyu bul
   res.render('edit', { photo }); // gönder
 });
 
 // catch action
-app.post('/photos', async (req, res) => {
+app.post('/photo', async (req, res) => {
   const uploadDir = 'public/uploads';
 
   if (!fs.existsSync(uploadDir))
@@ -76,7 +79,7 @@ app.post('/photos', async (req, res) => {
   });
 });
 
-app.put('/photos/:id', async (req, res) => { 
+app.put('/photo/:id', async (req, res) => { 
   const photo = await Photo.findOne({_id : req.params.id}); // id ile fotoyu bul
 
   photo.title = req.body.title;
@@ -86,13 +89,14 @@ app.put('/photos/:id', async (req, res) => {
   res.redirect(`/photo/${req.params.id}`); 
 });
 
-app.delete('/photos/:id', async (req, res) => { 
+app.delete('/photo/:id', async (req, res) => { 
   const photo = await Photo.findOne({_id : req.params.id}); // id ile fotoyu bul
-
+  
   let deletedPhoto = __dirname + '/public' + photo.image;
-  photo.save();
+  fs.unlinkSync(deletedPhoto);
 
-  res.redirect(`/photo/${req.params.id}`); 
+  await Photo.findByIdAndRemove(req.params.id);
+  res.redirect('/');
 });
 
 app.listen(port, () => {
