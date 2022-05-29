@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const fileUpload = require('express-fileupload');
+const methodOverride = require('method-override')
 const ejs = require('ejs');
 const path = require('path');
 const fs = require('fs');
@@ -22,6 +23,7 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(methodOverride('_method'));
 app.use(fileUpload());
 
 const port = 3000;
@@ -48,6 +50,11 @@ app.get('/photo/:id', async (req, res) => {
   res.render('photo', { photo }); // gönder
 });
 
+app.get('/photos/edit/:id', async (req, res) => {
+  const photo = await Photo.findOne({_id : req.params.id}); // id ile fotoyu bul
+  res.render('edit', { photo }); // gönder
+});
+
 // catch action
 app.post('/photos', async (req, res) => {
   const uploadDir = 'public/uploads';
@@ -67,6 +74,25 @@ app.post('/photos', async (req, res) => {
     });
     res.redirect('/');
   });
+});
+
+app.put('/photos/:id', async (req, res) => { 
+  const photo = await Photo.findOne({_id : req.params.id}); // id ile fotoyu bul
+
+  photo.title = req.body.title;
+  photo.detail = req.body.detail;
+  photo.save();
+
+  res.redirect(`/photo/${req.params.id}`); 
+});
+
+app.delete('/photos/:id', async (req, res) => { 
+  const photo = await Photo.findOne({_id : req.params.id}); // id ile fotoyu bul
+
+  let deletedPhoto = __dirname + '/public' + photo.image;
+  photo.save();
+
+  res.redirect(`/photo/${req.params.id}`); 
 });
 
 app.listen(port, () => {
